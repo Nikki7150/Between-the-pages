@@ -1,0 +1,33 @@
+#bookshelf {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 24px;
+  padding: 40px;
+  min-height: 60vh;
+}
+
+/* Optional empty state */
+#bookshelf.empty::after {
+  content: "Your shelf is waiting for its first story 📚";
+  color: #888;
+  font-style: italic;
+  grid-column: 1 / -1;
+  text-align: center;
+}
+
+.book {
+  width: 120px;
+  height: 180px;
+  background: #c4a484;
+  border-radius: 6px;
+  display: flex;
+  align-items: flex-end;
+  cursor: pointer;
+}
+
+.book .spine {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  padding: 12px;
+  font-weight: bold;
+}
