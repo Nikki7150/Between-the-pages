@@ -8,14 +8,23 @@
         <!--google login things-->
         <script src="https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js"></script>
         <script src="https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js"></script>
+
+        <link href="https://fonts.googleapis.com/css2?family=Indie+Flower&display=swap" rel="stylesheet" />
+        <link href="https://fonts.googleapis.com/css2?family=Playpen+Sans&display=swap" rel="stylesheet" /> 
     </head>
 
-    <body style="margin: 0; padding: 0;">
+    <body>
+        <nav>
+            <h1><span id="username" title="username"></span>'s Bookshelf</h1>
+            <button id="add-book-button" title="Add Book">Add a book</button>
+            <button id="settings-button" title="Settings">⚙️</button>
+            <img id="profile-pic" alt="Profile Picture" title="Profile Picture">
+        </nav>
+
         <main id="bookshelf">
 
         </main>
 
-        <button id="add-book-button" title="Add Book">+</button>
         <!----------------------------------------------------------------------------------------------------------------------------------------------------------->
         <!--Footer-->
         <!----------------------------------------------------------------------------------------------------------------------------------------------------------->

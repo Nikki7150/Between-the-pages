@@ -8,6 +8,15 @@ html {
     background-position: center;
 }
 
+:root {
+  --global-font: 'Indie Flower', cursive;
+}
+
+/* Force font on ALL elements including buttons, inputs, etc. */
+* {
+    font-family: var(--global-font) !important;
+}
+
 #login-button {
     background-color: #b89e8c; 
     border: none;
@@ -16,27 +25,27 @@ html {
     text-align: center;
     text-decoration: none;
     display: inline-block;
-    font-size: 16px;
+    font-size: 20px;
     cursor: pointer;
     border-radius: 8px;
     animation: pulse 1s infinite;
     position: absolute;
     left: 23.3%;
     top: 41.2%;
-    box-shadow: 0 0 10px 0 rgba(255, 215, 0, 0.8);
+    box-shadow: 0 0 5px 0 rgb(255, 217, 0);
     height: 55px;
     width: 14%;
 }
 
 @keyframes pulse {
     0% {
-        box-shadow: 0 0 10px 0 rgba(255, 215, 0, 0.8);
+        box-shadow: 0 0 5px 0 rgb(255, 217, 0);
     }
     50% {
-        box-shadow: 0 0 25px 10px rgba(255, 215, 0, 0.4);
+        box-shadow: 0 0 15px 0 rgba(255, 217, 0, 0.4);
     }
     100% {
-        box-shadow: 0 0 10px 0 rgba(255, 215, 0, 0.0);
+        box-shadow: 0 0 10px 0 rgba(255, 217, 0, 0.0);
     }
 }
 
@@ -44,26 +53,26 @@ html {
     animation: none;
 }
 
-h2 {
+h1 {
     text-align: center;
     position: absolute;
-    left: 50%;
-    top: 50%;
+    left: 10%;
+    bottom: 15%;
     transform: translateX(-50%);
 }
 
 p {
     text-align: center;
     position: absolute;
-    left: 50%;
-    top: 55%;
+    left: 10%;
+    bottom: 10%;
     transform: translateX(-50%);
 }
 
 footer {
     position: absolute;
     bottom: 5%;
-    left: 50%;
+    left: 10%;
     transform: translateX(-50%);
     width: 100%;
     text-align: center;
