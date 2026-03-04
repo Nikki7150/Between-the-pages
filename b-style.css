@@ -32,9 +32,10 @@ nav {
 }
 
 #bookshelf {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-  gap: 24px;
+  display: flex;
+  flex-wrap: wrap;        /* creates new shelves automatically */
+  align-items: flex-end;  /* books sit on the shelf bottom */
+  gap: 3px;               /* small space between books */
   padding: 40px;
 }
 
@@ -48,20 +49,20 @@ nav {
 }
 
 .book {
-  width: 120px;
+  width: 40px;
   height: 180px;
   background: #c4a484;
-  border-radius: 6px;
+  border-radius: 3px;
   display: flex;
+  justify-content: center;
   align-items: flex-end;
-  cursor: pointer;
 }
 
 .book .spine {
   writing-mode: vertical-rl;
   transform: rotate(180deg);
-  padding: 12px;
-  font-weight: bold;
+  padding: 6px;
+  font-size: 12px;
 }
 
 footer {
@@ -118,4 +119,149 @@ h1 {
     position: absolute;
     left: 2%;
     top: 19%;
+}
+
+/* Hide modal */
+.hidden {
+  display: none;
+}
+
+/* Modal box */
+#settings-modal .modal-content {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  width: 300px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  position: absolute;
+  right: 10px;
+  transform: translateX(-50%);
+  height: 100%;
+}
+
+#close-settings-modal {
+  margin-top: 10px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 19px;
+   /* font-family: 'Indie Flower', cursive; */
+  bottom: 10%;
+  left: 45%;
+  position: absolute;
+}
+
+.font-option {
+     /* font-family: 'Indie Flower', cursive; */
+    font-size: 18px;
+    padding: 4px;
+    cursor: pointer;
+    border: none;
+    border-radius: 8px;
+    background: var(--panel-bg);
+    color: rgb(0, 0, 0);
+    margin: 10px 0;
+}
+
+.theme-option {
+     /* font-family: 'Indie Flower', cursive; */
+    font-size: 18px;
+    padding: 4px;
+    cursor: pointer;
+    border: none;
+    border-radius: 8px;
+    background: var(--panel-bg);
+    color: rgb(0, 0, 0);
+    margin: 10px 0;
+}
+
+.color-theme {
+     /* font-family: 'Indie Flower', cursive; */
+    font-size: 18px;
+    padding: 4px;
+    cursor: pointer;
+    border: none;
+    border-radius: 8px;
+    background: var(--panel-bg);
+    color: rgb(0, 0, 0);
+    margin: 10px 0;
+    }
+
+/*make color-theme buttons in 2 columns*/
+.color-theme-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+.heading {
+     /* font-family: 'Indie Flower', cursive; */
+    font-size: 20px;
+    text-decoration: underline;
+}
+
+/*make font-style buttons in 2 columns*/
+.font-option-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+#close-s-modal {
+    margin-top: 20px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 39px;
+     /* font-family: 'Indie Flower', cursive; */
+    position: absolute;
+    left: 8%;
+    top: 1%;
+}
+
+/* Modal box */
+#profile-modal .modal-content {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  width: 300px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+  position: relative;
+  left: 50%;
+  transform: translateX(-50%);
+  height: 100%;
+}
+
+#close-p-modal {
+    margin-top: 20px;
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    font-size: 39px;
+     /* font-family: 'Indie Flower', cursive; */
+    position: absolute;
+    left: 8%;
+    top: 1%;
+}
+
+#close-profile-modal {
+  margin-top: 10px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 19px;
+   /* font-family: 'Indie Flower', cursive; */
+  bottom: 10%;
+  left: 45%;
+  position: absolute;
+}
+
+#logout-button {
+    font-size: 20px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    color: rgb(104, 61, 61);
 }
