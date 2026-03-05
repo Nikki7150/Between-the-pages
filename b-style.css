@@ -121,6 +121,30 @@ h1 {
     top: 19%;
 }
 
+/* Modal overlay */
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+/* Modal box */
+.modal-content {
+  background: white;
+  padding: 25px;
+  border-radius: 12px;
+  width: 300px;
+  text-align: center;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+}
+
 /* Hide modal */
 .hidden {
   display: none;
@@ -134,8 +158,8 @@ h1 {
   width: 300px;
   text-align: center;
   box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-  position: absolute;
-  right: 10px;
+  position: relative;
+  left: 50%;
   transform: translateX(-50%);
   height: 100%;
 }
@@ -264,4 +288,39 @@ h1 {
     background: transparent;
     cursor: pointer;
     color: rgb(104, 61, 61);
+}
+
+/*Star rating styles*/
+.rating {
+    display: flex;
+    flex-direction: row-reverse; /* Reverse the order for CSS styling convenience */
+    justify-content: start;
+}
+
+.rating input {
+    display: none; /* Hide the radio buttons */
+}
+
+.rating label {
+    color: #ccc; /* Default color for unselected stars */
+    cursor: pointer;
+    font-size: 30px; /* Adjust size as needed */
+    transition: color 0.2s ease;
+}
+
+/* Color the checked star and all preceding stars (due to row-reverse) */
+.rating input:checked ~ label {
+    color: orange;
+}
+
+/* Add hover effect */
+.rating label:hover,
+.rating label:hover ~ label {
+    color: darkorange;
+}
+
+/* Optional: additional styling for the output div */
+#output {
+    margin-top: 10px;
+    font-size: 18px;
 }

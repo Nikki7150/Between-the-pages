@@ -88,6 +88,63 @@
         </div>
 
         <!----------------------------------------------------------------------------------------------------------------------------------------------------------->
+        <!--Slide up Book details modal-->
+        <!----------------------------------------------------------------------------------------------------------------------------------------------------------->
+        <div id="book-modal" class="modal hidden"> 
+            <div class="modal-content">
+                <!--Book cover photo-->
+                <div>
+                    <img id="book-cover-preview" alt="Book Cover Preview" title="Book Cover Preview" />
+                    <input type="file" id="book-cover-input" accept="image/*" />
+                </div>
+                <input type="text" id="book-title-input" placeholder="Book Title" />
+                <input type="text" id="book-author-input" placeholder="Book Author" />
+                <div class="rating">
+                    <!-- Stars are ordered in reverse visually but correctly in HTML -->
+                    <input type="radio" id="star5" name="rating" value="5" />
+                    <label for="star5" title="5 stars">&#9733;</label>
+                    <input type="radio" id="star4" name="rating" value="4" />
+                    <label for="star4" title="4 stars">&#9733;</label>
+                    <input type="radio" id="star3" name="rating" value="3" />
+                    <label for="star3" title="3 stars">&#9733;</label>
+                    <input type="radio" id="star2" name="rating" value="2" />
+                    <label for="star2" title="2 stars">&#9733;</label>
+                    <input type="radio" id="star1" name="rating" value="1" />
+                    <label for="star1" title="1 star">&#9733;</label>
+                </div>
+                <div id="output">Rating is: 0/5</div>
+                <button id="genre-button">Select Genre</button> <!--changes height of book-->
+                <input type="text" id="pages-input" placeholder="Number of Pages" /> <!--changes width of book-->
+                <input type="color" id="color-input" title="Choose book color" /> <!--changes color of book-->
+                <textarea id="book-notes-input" placeholder="Your notes about the book..."></textarea>
+                <button id="save-book-notes">Save Notes</button>
+                <hr />
+                <button id="close-book-modal">Close &times;</button>
+            </div>
+        </div>
+
+        <!----------------------------------------------------------------------------------------------------------------------------------------------------------->
+        <!--Genre selection modal-->
+        <!----------------------------------------------------------------------------------------------------------------------------------------------------------->
+        <div id="genre-popup" class="block-popup hidden">
+            <div class="genre-column">
+                <p>Genre:</p>
+                <button id="fantasy">Fantasy</button>
+                <button id="romance">Romance</button>
+                <button id="young-adult">Young Adult</button>
+                <button id="Thriller">Thriller</button>
+                <button id="Memoir">Memoir</button>
+                <button id="science-fiction">Science Fiction</button>
+                <button id="self-help">Self Help</button>
+                <button id="horror">Horror</button>
+                <button id="literary-fiction">Literary Fiction</button>
+                <button id="true-crime">True Crime</button>
+                <input type="text" id="custom-genre-input" placeholder="Custom" />
+            </div>
+        </div>
+
+
+        <!----------------------------------------------------------------------------------------------------------------------------------------------------------->
         <!--Footer-->
         <!----------------------------------------------------------------------------------------------------------------------------------------------------------->
         <footer>

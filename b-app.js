@@ -385,3 +385,20 @@ onAuthStateChanged(auth, (user) => {
     });
   }
 });
+
+/*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
+// Stars rating logic
+/*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
+// Access all radio buttons
+const stars = document.querySelectorAll('.rating input');
+const output = document.getElementById('output');
+
+// Add event listener to each radio button
+stars.forEach(star => {
+    star.addEventListener('click', () => {
+        const ratingValue = star.value;
+        output.innerText = `Rating is: ${ratingValue}/5`;
+        // Here you can add logic to send the rating to your server
+    });
+});
+
