@@ -56,6 +56,7 @@ nav {
   display: flex;
   justify-content: center;
   align-items: flex-end;
+  cursor: pointer;
 }
 
 .book .spine {
@@ -302,7 +303,7 @@ h1 {
 }
 
 .rating label {
-    color: #ccc; /* Default color for unselected stars */
+    color: #ffffff; /* Default color for unselected stars */
     cursor: pointer;
     font-size: 30px; /* Adjust size as needed */
     transition: color 0.2s ease;
@@ -310,17 +311,47 @@ h1 {
 
 /* Color the checked star and all preceding stars (due to row-reverse) */
 .rating input:checked ~ label {
-    color: orange;
+    color: rgb(255, 235, 122);
 }
 
 /* Add hover effect */
 .rating label:hover,
 .rating label:hover ~ label {
-    color: darkorange;
+    color: rgb(255, 235, 122);
 }
 
 /* Optional: additional styling for the output div */
 #output {
     margin-top: 10px;
     font-size: 18px;
+}
+
+/* Genre popup styles */
+#book-modal-content {
+    position: absolute;
+    background: rgb(208, 187, 161);
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 0px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+    width: 60%;
+    height: 90%;
+    bottom: 0;
+}
+
+/*make book modal slide up from bottom*/
+#book-modal-content {
+    animation: slideUp 1s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(100%);
+        opacity: 1;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
 }

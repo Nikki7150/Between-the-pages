@@ -67,12 +67,19 @@ function renderBookshelf() {
   books.forEach(book => {
     const bookEl = document.createElement("div");
     bookEl.className = "book";
+
     bookEl.innerHTML = `
       <div class="spine">${book.title}</div>
     `;
 
+    bookEl.addEventListener("click", () => {
+      openBook(book);
+    });
+
     bookshelfEl.appendChild(bookEl);
   });
+
+  bookEl.dataset.id = book.id;
 }
 renderBookshelf();
 
@@ -402,3 +409,55 @@ stars.forEach(star => {
     });
 });
 
+
+/*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
+// Book details modal logic
+/*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
+const bookModal = document.getElementById("book-modal");
+const closeBookModal = document.getElementById("close-book-modal");
+
+closeBookModal.addEventListener("click", () => {
+  bookModal.classList.add("hidden");
+});
+
+let activeBook = null;
+
+function openBook(book) {
+  activeBook = book;
+
+  document.getElementById("book-title").value = book.title;
+  document.getElementById("book-author").value = book.author;
+  document.getElementById("book-notes").value = book.notes;
+  if (book.rating) {
+    const star = document.querySelector(`.rating input[value="${book.rating}"]`);
+    if (star) star.checked = true;
+  }
+  document.getElementById("output").innerText = `Rating is: ${book.rating || 0}/5`;
+  document.getElementById("color").value = book.color || "#ffffff";
+  document.getElementById("genre-button").innerText = book.genre || "Select Genre";
+  document.getElementById("book-cover-preview").src = book.cover || "";
+  document.getElementById("book-cover-preview").style.display =
+    book.cover ? "block" : "none";
+  document.getElementById("book-pages").value = book.pages || "";
+
+  document
+  .getElementById("save-book-notes")
+  .addEventListener("click", () => {
+    if (!activeBook) return;
+
+    activeBook.title = document.getElementById("book-title").value;
+    activeBook.author = document.getElementById("book-author").value;
+    activeBook.pages = document.getElementById("book-pages").value;
+    activeBook.notes = document.getElementById("book-notes").value;
+    activeBook.color = document.getElementById("color").value;
+
+    const selectedStar = document.querySelector(".rating input:checked");
+    activeBook.rating = selectedStar ? selectedStar.value : null;
+
+    renderBookshelf();
+
+    bookModal.classList.add("hidden");
+  });
+
+  bookModal.classList.remove("hidden");
+}
