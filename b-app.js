@@ -2,7 +2,7 @@
 // Import the functions you need from the SDKs you need
 /*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
 import { initializeApp } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js";
-import { getAuth, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
+import { getAuth , onAuthStateChanged, signOut} from "https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js";
 
 /*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
 //  web app's Firebase configuration
@@ -16,13 +16,30 @@ const firebaseConfig = {
   appId: "1:484810246963:web:ca89001f441850b0f88c46"
 };
 
+import { 
+  getFirestore,
+  doc,
+  setDoc,
+  getDoc
+} from "https://www.gstatic.com/firebasejs/12.8.0/firebase-firestore.js";
+import {
+  getStorage,
+  ref,
+  uploadBytes,
+  getDownloadURL
+} from "https://www.gstatic.com/firebasejs/12.8.0/firebase-storage.js";
+
+
 // Initialize Firebase again
 const firebaseApp = initializeApp(firebaseConfig);
 const auth = getAuth(firebaseApp);
+const db = getFirestore(firebaseApp);
+const storage = getStorage(firebaseApp);
 
-onAuthStateChanged(auth, (user) => {
+onAuthStateChanged(auth, async (user) => {
   if (user) {
     // User is logged in
+    await loadDashboard(user.uid);
     console.log(user);
 
     const name = user.displayName;
@@ -48,6 +65,46 @@ onAuthStateChanged(auth, (user) => {
 });
 
 /*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
+// Function to save the dashboard state to Firestore
+/*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
+async function saveDashboard(userId) {
+  try {
+    const ref = doc(db, "users", userId);
+
+    await setDoc(ref, {
+      books: books
+    }, { merge: true });
+
+    console.log("Dashboard saved");
+  } catch (err) {
+    console.error("Error saving dashboard:", err);
+  }
+}
+
+/*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
+// Function to load the dashboard state from Firestore
+/*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
+async function loadDashboard(userId) {
+  try {
+    const ref = doc(db, "users", userId);
+    const snap = await getDoc(ref);
+
+    if (!snap.exists()) return;
+
+    const data = snap.data();
+
+    if (data.books) {
+      books.length = 0; // clear current
+      books.push(...data.books);
+      renderBookshelf();
+    }
+
+  } catch (err) {
+    console.error("Error loading dashboard:", err);
+  }
+}
+
+/*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
 // Bookshelf Functionality
 /*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
 const books = [];
@@ -67,6 +124,7 @@ function renderBookshelf() {
   books.forEach(book => {
     const bookEl = document.createElement("div");
     bookEl.className = "book";
+    bookEl.style.backgroundColor = book.color || "#868686";
 
     bookEl.innerHTML = `
       <div class="spine">${book.title}</div>
@@ -79,11 +137,11 @@ function renderBookshelf() {
     bookshelfEl.appendChild(bookEl);
   });
 
-  bookEl.dataset.id = book.id;
+  bookEl.dataset.id = books.id;
 }
 renderBookshelf();
 
-document.getElementById("add-book-button").addEventListener("click", () => {
+document.getElementById("add-book-button").addEventListener("click", async () => {
   const newBook = {
     id: crypto.randomUUID(),
     title: "Untitled Book",
@@ -91,13 +149,154 @@ document.getElementById("add-book-button").addEventListener("click", () => {
     pages: 0,
     rating: null,
     notes: "",
-    cover: null
+    cover: null,
+    color: "#868686"
   };
 
   books.push(newBook);
   renderBookshelf();
+  await saveDashboard(auth.currentUser.uid);
 });
 
+
+/*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
+// Stars rating logic
+/*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
+// Access all radio buttons
+const stars = document.querySelectorAll('.rating input');
+const output = document.getElementById('output');
+
+// Add event listener to each radio button
+stars.forEach(star => {
+    star.addEventListener('click', () => {
+        const ratingValue = star.value;
+        output.innerText = `Rating is: ${ratingValue}/5`;
+        // Here you can add logic to send the rating to your server
+    });
+});
+
+
+/*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
+// Book details modal logic
+/*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
+const bookModal = document.getElementById("book-modal");
+const bookModalContent = document.getElementById("book-modal-content");
+const closeBookModal = document.getElementById("close-book-modal");
+
+closeBookModal.addEventListener("click", () => {
+  const handleAnimationEnd = () => {
+    bookModalContent.removeEventListener("animationend", handleAnimationEnd);
+    bookModalContent.classList.remove("remove");
+    bookModal.classList.add("hidden");
+  };
+
+  bookModalContent.addEventListener("animationend", handleAnimationEnd);
+  bookModalContent.classList.add("remove");
+});
+
+let activeBook = null;
+
+function openBook(book) {
+  activeBook = book;
+
+  document.getElementById("book-title").value = book.title;
+  document.getElementById("book-author").value = book.author;
+  document.getElementById("book-notes").value = book.notes;
+  if (book.rating) {
+    const star = document.querySelector(`.rating input[value="${book.rating}"]`);
+    if (star) star.checked = true;
+  }
+  document.getElementById("output").innerText = `Rating is: ${book.rating || 0}/5`;
+  document.getElementById("color").value = book.color || "#868686";
+  document.getElementById("genre-button").innerText = book.genre || "Select Genre";
+  document.getElementById("book-cover-preview").src = book.cover || "";
+  document.getElementById("book-cover-preview").style.display = book.cover ? "block" : "none";
+  document.getElementById("book-pages").value = book.pages || "";
+
+  document.getElementById("save-book-notes").addEventListener("click", async () => {
+    if (!activeBook) return;
+
+    activeBook.title = document.getElementById("book-title").value;
+    activeBook.author = document.getElementById("book-author").value;
+    activeBook.pages = document.getElementById("book-pages").value;
+    activeBook.notes = document.getElementById("book-notes").value;
+    activeBook.color = document.getElementById("color").value;
+
+    const selectedStar = document.querySelector(".rating input:checked");
+    activeBook.rating = selectedStar ? selectedStar.value : null;
+
+    renderBookshelf();
+    await saveDashboard(auth.currentUser.uid);
+
+    bookModal.classList.add("hidden");
+  });
+
+  bookModal.classList.remove("hidden");
+}
+
+/*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
+// change color of book logic
+/*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
+const colorInput = document.getElementById("color");
+
+colorInput.addEventListener("input", async (e) => {
+  if (!activeBook) return;
+
+  const color = e.target.value;
+  activeBook.color = color;
+
+  renderBookshelf();
+  await saveDashboard(auth.currentUser.uid);
+});
+
+/*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
+// saving book cover logic
+/*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
+const coverInput = document.getElementById("book-cover-input");
+const coverPreview = document.getElementById("book-cover-preview");
+
+coverInput.addEventListener("change", (e) => {
+  if (!activeBook) return;
+
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+
+  reader.onload = function(event) {
+    const base64Image = event.target.result;
+
+    activeBook.cover = base64Image;
+
+    coverPreview.src = base64Image;
+    coverPreview.style.display = "block";
+  };
+
+  reader.readAsDataURL(file);
+});
+
+coverPreview.addEventListener("click", () => {
+  coverInput.click();
+});
+
+/*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
+// Genre selection logic (for demo purposes, just toggles between genres)
+/*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
+const genreButton = document.getElementById("genre-button");
+const genres = document.getElementById("genre-popup");
+
+genreButton.addEventListener("click", () => {
+  if (!activeBook) return;
+
+  if (genres.style.display === "block") {
+    genres.style.display = "none";
+  } else {
+    genres.style.display = "block";
+    const rect = genreButton.getBoundingClientRect();
+    genres.style.top = `${rect.top + window.scrollY}px`;
+    genres.style.left = `${rect.right + 8 + window.scrollX}px`;
+  }
+});
 
 /*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
 // Settings modal logic
@@ -392,72 +591,3 @@ onAuthStateChanged(auth, (user) => {
     });
   }
 });
-
-/*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
-// Stars rating logic
-/*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
-// Access all radio buttons
-const stars = document.querySelectorAll('.rating input');
-const output = document.getElementById('output');
-
-// Add event listener to each radio button
-stars.forEach(star => {
-    star.addEventListener('click', () => {
-        const ratingValue = star.value;
-        output.innerText = `Rating is: ${ratingValue}/5`;
-        // Here you can add logic to send the rating to your server
-    });
-});
-
-
-/*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
-// Book details modal logic
-/*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
-const bookModal = document.getElementById("book-modal");
-const closeBookModal = document.getElementById("close-book-modal");
-
-closeBookModal.addEventListener("click", () => {
-  bookModal.classList.add("hidden");
-});
-
-let activeBook = null;
-
-function openBook(book) {
-  activeBook = book;
-
-  document.getElementById("book-title").value = book.title;
-  document.getElementById("book-author").value = book.author;
-  document.getElementById("book-notes").value = book.notes;
-  if (book.rating) {
-    const star = document.querySelector(`.rating input[value="${book.rating}"]`);
-    if (star) star.checked = true;
-  }
-  document.getElementById("output").innerText = `Rating is: ${book.rating || 0}/5`;
-  document.getElementById("color").value = book.color || "#ffffff";
-  document.getElementById("genre-button").innerText = book.genre || "Select Genre";
-  document.getElementById("book-cover-preview").src = book.cover || "";
-  document.getElementById("book-cover-preview").style.display =
-    book.cover ? "block" : "none";
-  document.getElementById("book-pages").value = book.pages || "";
-
-  document
-  .getElementById("save-book-notes")
-  .addEventListener("click", () => {
-    if (!activeBook) return;
-
-    activeBook.title = document.getElementById("book-title").value;
-    activeBook.author = document.getElementById("book-author").value;
-    activeBook.pages = document.getElementById("book-pages").value;
-    activeBook.notes = document.getElementById("book-notes").value;
-    activeBook.color = document.getElementById("color").value;
-
-    const selectedStar = document.querySelector(".rating input:checked");
-    activeBook.rating = selectedStar ? selectedStar.value : null;
-
-    renderBookshelf();
-
-    bookModal.classList.add("hidden");
-  });
-
-  bookModal.classList.remove("hidden");
-}

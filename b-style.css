@@ -35,8 +35,10 @@ nav {
   display: flex;
   flex-wrap: wrap;        /* creates new shelves automatically */
   align-items: flex-end;  /* books sit on the shelf bottom */
-  gap: 3px;               /* small space between books */
+  column-gap: 4px;  /* space between books on same shelf */
+  row-gap: 40px;    /* space between shelves (rows) */
   padding: 40px;
+  background-color: #6c5151;
 }
 
 /* Optional empty state */
@@ -51,7 +53,7 @@ nav {
 .book {
   width: 40px;
   height: 180px;
-  background: #c4a484;
+  background: #868686;
   border-radius: 3px;
   display: flex;
   justify-content: center;
@@ -342,7 +344,11 @@ h1 {
 
 /*make book modal slide up from bottom*/
 #book-modal-content {
-    animation: slideUp 1s ease-out;
+  animation: slideUp 1s ease-out;
+}
+
+#book-modal-content.remove {
+  animation: slideDown 1s ease-out forwards;
 }
 
 @keyframes slideUp {
@@ -354,4 +360,69 @@ h1 {
         transform: translateY(0);
         opacity: 1;
     }
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateY(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateY(100%);
+        opacity: 1;
+    }
+}
+
+#book-cover-input {
+  display: none;
+}
+
+#book-cover-preview {
+  cursor: pointer;
+}
+
+.genre-popup {
+  position: absolute;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 6px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  z-index: 2001;
+}
+
+.genre-popup button {
+  background: none;
+  border: none;
+  padding: 6px 10px;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.genre-popup button:hover {
+  background: #f2f2f2;
+}
+
+.hidden {
+  display: none;
+}
+
+.genre-popup {
+  animation: popIn 0.12s ease-out;
+  box-shadow: 0 12px 36px rgba(0,0,0,0.16);
+}
+
+@keyframes popIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
 }
