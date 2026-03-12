@@ -8,7 +8,7 @@
 }
 
 html, body {
-    background: #f5f0e6;
+    background-color: #6c5151;
     background-size: cover;
     background-position: center;
     margin: 0;
@@ -20,7 +20,10 @@ html, body {
 
 nav {
     width: 100%;
-    height: 50px;
+    box-sizing: border-box;
+    display: flex;
+    align-items: center;
+    height: 100px;
     background-color: #e0e0e0;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     position: sticky;
@@ -28,37 +31,57 @@ nav {
     z-index: 1000;
     font-size: 20px;
     padding: 20px;
-    padding-right: 20px;
 }
-
+/*
 #bookshelf {
   display: flex;
-  flex-wrap: wrap;        /* creates new shelves automatically */
-  align-items: flex-end;  /* books sit on the shelf bottom */
-  column-gap: 4px;  /* space between books on same shelf */
-  row-gap: 40px;    /* space between shelves (rows) */
+  flex-wrap: wrap;        /* creates new shelves automatically 
+  align-items: flex-end;  /* books sit on the shelf bottom 
+  column-gap: 4px;  /* space between books on same shelf 
+  row-gap: 40px;    /* space between shelves (rows) 
   padding: 40px;
-  background-color: #6c5151;
 }
 
-/* Optional empty state */
+/* Optional empty state 
 #bookshelf.empty::after {
-  /*content: "Your shelf is waiting for its first story 📚";*/
-  color: #888;
+  content: "Your shelf is waiting for its first story 📚";
+  color: #e8e8e8;
   font-style: italic;
   grid-column: 1 / -1;
   text-align: center;
 }
 
+#bookshelf {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  column-gap: 4px;  /* space between books on same shelf 
+  row-gap: 40px;    /* space between shelves (rows) 
+  padding: 40px;
+
+  /* bookshelf look 
+  background: repeating-linear-gradient(
+  to bottom,
+  transparent 0px,
+  transparent 220px,
+  #7a4f2b 220px,
+  #9b6a3a 225px,
+  #6b3f1e 230px
+);
+  border-left: 20px solid #6b3f1e;
+  border-right: 20px solid #6b3f1e;
+}
+
 .book {
   width: 40px;
   height: 180px;
-  background: #868686;
+  background: #e8e8e8;
   border-radius: 3px;
   display: flex;
   justify-content: center;
   align-items: flex-end;
   cursor: pointer;
+  margin-bottom: 5px;
 }
 
 .book .spine {
@@ -66,6 +89,42 @@ nav {
   transform: rotate(180deg);
   padding: 6px;
   font-size: 12px;
+}*/
+
+#bookshelf {
+  padding: 40px;
+  display: flex;
+  flex-direction: column;
+  gap: 60px;
+}
+
+.shelf {
+  display: flex;
+  align-items: flex-end;
+  gap: 4px;
+  padding: 0 10px;
+
+  border-bottom: 12px solid #7a4f2b;
+  box-shadow: 0 6px 8px rgba(0,0,0,0.25);
+
+  
+}
+
+.book {
+  min-width: 18px;
+  min-height: 180px;
+  background: #e5e5e5;
+  border-radius: 3px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  cursor: pointer;
+}
+
+.spine {
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  font-size: 10px;
 }
 
 footer {
@@ -77,6 +136,20 @@ footer {
     padding: 20px;
     width: 100%;
     box-sizing: border-box;
+}
+
+#add-trinkets {
+    background-color: #b89e8c; 
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    padding: 5px 10px;
+    position: absolute;
+    left: 40%;
+    top: 22%;
 }
 
 #add-book-button {
@@ -99,7 +172,7 @@ footer {
     border-radius: 50%;
     cursor: pointer;
     position: absolute;
-    right: 4%;
+    right: 2%;
     top: 19%;
 }
 
@@ -109,8 +182,8 @@ footer {
     border-radius: 50%;
     cursor: pointer;
     position: absolute;
-    right: 9%;
-    top: 5%;
+    right: 7%;
+    top: 9%;
     border: none;
     background-color: transparent;
     font-size: 60px;
@@ -328,7 +401,6 @@ h1 {
     font-size: 18px;
 }
 
-/* Genre popup styles */
 #book-modal-content {
     position: absolute;
     background: rgb(208, 187, 161);
@@ -381,17 +453,103 @@ h1 {
   cursor: pointer;
 }
 
+
 .genre-popup {
+  width: fit-content;
   position: absolute;
   background: #fff;
   border: 1px solid #ddd;
   border-radius: 8px;
   padding: 6px;
   box-shadow: 0 8px 20px rgba(0,0,0,0.12);
+  z-index: 2001;
+}
+.genrepop-columns {
+  display: grid;
+  gap: 10px;
+}
+
+.genre-column {
   display: flex;
   flex-direction: column;
   gap: 4px;
+}
+
+.genre-heading {
+  margin: 4px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.genre-custom-input {
+  grid-column: 1 / -1;
+}
+
+.genre-popup button {
+  background: none;
+  border: none;
+  padding: 6px 10px;
+  text-align: left;
+  cursor: pointer;
+  border-radius: 6px;
+}
+
+.genre-popup button:hover {
+  background: #f2f2f2;
+}
+
+.hidden {
+  display: none;
+}
+
+.genre-popup {
+  animation: popIn 0.12s ease-out;
+  box-shadow: 0 12px 36px rgba(0,0,0,0.16);
+}
+
+@keyframes popIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
+/* Trinket popup styles */
+/*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
+.trinket-popup {
+  width: fit-content;
+  position: absolute;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  padding: 6px;
+  box-shadow: 0 8px 20px rgba(0,0,0,0.12);
   z-index: 2001;
+}
+.genrepop-columns {
+  display: grid;
+  gap: 10px;
+}
+
+.genre-column {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.genre-heading {
+  margin: 4px;
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.genre-custom-input {
+  grid-column: 1 / -1;
 }
 
 .genre-popup button {

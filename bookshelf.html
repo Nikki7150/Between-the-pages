@@ -17,13 +17,12 @@
         <nav>
             <h1><span id="username" title="username"></span>'s Bookshelf</h1>
             <button id="add-book-button" title="Add Book">Add a book</button>
+            <button id="add-trinkets" title="Add trinkets">+</button>
             <button id="settings-button" title="Settings">⚙️</button>
             <img id="profile-pic" alt="Profile Picture" title="Profile Picture">
         </nav>
 
-        <main id="bookshelf">
-
-        </main>
+        <div id="bookshelf"></div>
 
         <!----------------------------------------------------------------------------------------------------------------------------------------------------------->
         <!--Modal for the Settings-->
@@ -59,6 +58,7 @@
                     <button id="brown" class="color-theme">Brown</button>
                     <button id="yellow" class="color-theme">Yellow</button>
                 </div>
+                <button id="delete-all-books">Delete all books</button>
                 <hr />
                 <button id="close-settings-modal">Close &times;</button>
             </div>
@@ -120,6 +120,7 @@
                 <button id="save-book-notes">Save Notes</button>
                 <hr />
                 <button id="close-book-modal">Close &times;</button>
+                <button id="delete-book-button">Delete Book</button>
             </div>
         </div>
 
@@ -127,19 +128,37 @@
         <!--Genre selection modal-->
         <!----------------------------------------------------------------------------------------------------------------------------------------------------------->
         <div id="genre-popup" class="genre-popup hidden">
-            <div class="genre-column">
-                <p>Genre:</p>
-                <button id="fantasy">Fantasy</button>
-                <button id="romance">Romance</button>
-                <button id="young-adult">Young Adult</button>
-                <button id="Thriller">Thriller</button>
-                <button id="Memoir">Memoir</button>
-                <button id="science-fiction">Science Fiction</button>
-                <button id="self-help">Self Help</button>
-                <button id="horror">Horror</button>
-                <button id="literary-fiction">Literary Fiction</button>
-                <button id="true-crime">True Crime</button>
-                <input type="text" id="custom-genre-input" placeholder="Custom" />
+            <p class="genre-heading">Genre:</p>
+            <div class="genrepop-columns">
+                <div class="genre-column">
+                    <button id="fantasy">Fantasy</button>
+                    <button id="romance">Romance</button>
+                    <button id="young-adult">Young Adult</button>
+                    <button id="Thriller">Thriller</button>
+                    <button id="Memoir">Memoir</button>
+                    <button id="science-fiction">Science Fiction</button>
+                    <button id="self-help">Self Help</button>
+                    <button id="horror">Horror</button>
+                    <button id="literary-fiction">Literary Fiction</button>
+                    <button id="true-crime">True Crime</button>
+                    <input type="text" id="custom-genre-input" placeholder="Custom" class="genre-custom-input" />
+                </div>
+            </div>
+        </div>
+
+        <!----------------------------------------------------------------------------------------------------------------------------------------------------------->
+        <!--trinkets popup-->
+        <!----------------------------------------------------------------------------------------------------------------------------------------------------------->
+        <div id="trinkets-popup" class="trinkets-popup ">
+            <div class="trinkets-column">
+                <p>Trinkets:</p>
+                <button id="pens">Pens</button>
+                <button id="reading-lights">Reading Lights</button>
+                <button id="bookends">Bookends</button>
+                <button id="pot-plant">Potted Plants</button>
+                <button id="hanging-plant">Hanging Plants</button>
+                <button id="book-rests">Book Rests</button>
+                <input type="file" id="custom-trinket-input"  />
             </div>
         </div>
 

@@ -110,7 +110,7 @@ async function loadDashboard(userId) {
 const books = [];
 
 const bookshelfEl = document.getElementById("bookshelf");
-
+/*
 function renderBookshelf() {
   bookshelfEl.innerHTML = "";
 
@@ -124,7 +124,7 @@ function renderBookshelf() {
   books.forEach(book => {
     const bookEl = document.createElement("div");
     bookEl.className = "book";
-    bookEl.style.backgroundColor = book.color || "#868686";
+    bookEl.style.backgroundColor = book.color || "#e8e8e8";
 
     bookEl.innerHTML = `
       <div class="spine">${book.title}</div>
@@ -137,10 +137,81 @@ function renderBookshelf() {
     bookshelfEl.appendChild(bookEl);
   });
 
-  bookEl.dataset.id = books.id;
+  // After rendering, detect rows and assign alternating shelf colors
+  requestAnimationFrame(() => {
+    const bookElements = bookshelfEl.querySelectorAll('.book');
+    let currentRow = 0;
+    let lastTop = null;
+    
+    bookElements.forEach((bookEl) => {
+      const top = bookEl.offsetTop;
+      
+      if (lastTop !== null && top !== lastTop) {
+        currentRow++;
+      }
+      
+      bookEl.dataset.row = currentRow;
+      lastTop = top;
+    });
+  });
+}*/
+function renderBookshelf() {
+
+  bookshelfEl.innerHTML = "";
+
+  const shelfWidth = bookshelfEl.clientWidth;
+
+  let shelf = document.createElement("div");
+  shelf.className = "shelf";
+
+  let currentWidth = 0;
+
+  books.forEach(book => {
+
+    const bookWidth = getBookWidth(book.pages);
+    const gap = 4;
+
+    // if the book doesn't fit on the current shelf
+    if (currentWidth + bookWidth > shelfWidth) {
+      bookshelfEl.appendChild(shelf);
+
+      shelf = document.createElement("div");
+      shelf.className = "shelf";
+
+      currentWidth = 0;
+    }
+
+    const bookEl = document.createElement("div");
+    bookEl.className = "book";
+
+    bookEl.style.width = bookWidth + "px";
+    bookEl.style.backgroundColor = book.color || "#e8e8e8";
+
+    bookEl.innerHTML = `
+      <div class="spine">${book.title}</div>
+    `;
+
+    bookEl.addEventListener("click", () => {
+      openBook(book);
+    });
+
+    shelf.appendChild(bookEl);
+
+    currentWidth += bookWidth + gap;
+
+  });
+
+  bookshelfEl.appendChild(shelf);
 }
 renderBookshelf();
 
+window.addEventListener("resize", () => {
+  renderBookshelf();
+});
+
+/*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
+// Add book button logic
+/*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
 document.getElementById("add-book-button").addEventListener("click", async () => {
   const newBook = {
     id: crypto.randomUUID(),
@@ -150,10 +221,21 @@ document.getElementById("add-book-button").addEventListener("click", async () =>
     rating: null,
     notes: "",
     cover: null,
-    color: "#868686"
+    color: "#e8e8e8"
   };
 
   books.push(newBook);
+  renderBookshelf();
+  await saveDashboard(auth.currentUser.uid);
+});
+
+/*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
+// Add trtinkets logic 
+/*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
+document.getElementById("add-trinkets").addEventListener("click", async () => {
+  
+
+  books.push(newTrinket);
   renderBookshelf();
   await saveDashboard(auth.currentUser.uid);
 });
@@ -194,6 +276,32 @@ closeBookModal.addEventListener("click", () => {
   bookModalContent.classList.add("remove");
 });
 
+const deleteBookButton = document.getElementById("delete-book-button");
+
+deleteBookButton.addEventListener("click", async () => {
+  if (!activeBook) return;
+  
+  if (confirm(`Are you sure you want to delete "${activeBook.title}"?`)) {
+    const bookIndex = books.findIndex(b => b.id === activeBook.id);
+    
+    if (bookIndex !== -1) {
+      books.splice(bookIndex, 1);
+      renderBookshelf();
+      await saveDashboard(auth.currentUser.uid);
+      
+      const handleAnimationEnd = () => {
+        bookModalContent.removeEventListener("animationend", handleAnimationEnd);
+        bookModalContent.classList.remove("remove");
+        bookModal.classList.add("hidden");
+        activeBook = null;
+      };
+
+      bookModalContent.addEventListener("animationend", handleAnimationEnd);
+      bookModalContent.classList.add("remove");
+    }
+  }
+});
+
 let activeBook = null;
 
 function openBook(book) {
@@ -207,7 +315,7 @@ function openBook(book) {
     if (star) star.checked = true;
   }
   document.getElementById("output").innerText = `Rating is: ${book.rating || 0}/5`;
-  document.getElementById("color").value = book.color || "#868686";
+  document.getElementById("color").value = book.color || "#e8e8e8";
   document.getElementById("genre-button").innerText = book.genre || "Select Genre";
   document.getElementById("book-cover-preview").src = book.cover || "";
   document.getElementById("book-cover-preview").style.display = book.cover ? "block" : "none";
@@ -218,7 +326,7 @@ function openBook(book) {
 
     activeBook.title = document.getElementById("book-title").value;
     activeBook.author = document.getElementById("book-author").value;
-    activeBook.pages = document.getElementById("book-pages").value;
+    activeBook.pages = Number(document.getElementById("book-pages").value);
     activeBook.notes = document.getElementById("book-notes").value;
     activeBook.color = document.getElementById("color").value;
 
@@ -227,6 +335,7 @@ function openBook(book) {
 
     renderBookshelf();
     await saveDashboard(auth.currentUser.uid);
+    genres.style.display = "none";
 
     bookModal.classList.add("hidden");
   });
@@ -298,6 +407,22 @@ genreButton.addEventListener("click", () => {
   }
 });
 
+// --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// Add event listeners to genre options
+/*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
+const genreOptions = genres.querySelectorAll("div");
+
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// change width of books based on width
+/*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
+function getBookWidth(pages) {
+  if (!pages) return 16; // default width
+
+  const width = Math.ceil(pages / 100) * 16;
+
+  return Math.min(width, 160); // optional cap so huge books don't explode
+}
+
 /*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
 // Settings modal logic
 /*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
@@ -316,6 +441,23 @@ closeSettingsModal.addEventListener("click", () => {
 
 closeSettingsModalAlt.addEventListener("click", () => {
   settingsModal.classList.add("hidden");
+});
+
+const deleteAllBooksBtn = document.getElementById("delete-all-books");
+
+deleteAllBooksBtn.addEventListener("click", async () => {
+  if (books.length === 0) {
+    alert("No books to delete!");
+    return;
+  }
+
+  if (confirm(`Are you sure you want to delete ALL ${books.length} book(s)? This cannot be undone!`)) {
+    books.length = 0; // Clear the books array
+    renderBookshelf();
+    await saveDashboard(auth.currentUser.uid);
+    settingsModal.classList.add("hidden");
+    alert("All books have been deleted.");
+  }
 });
 
 /*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
