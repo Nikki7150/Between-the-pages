@@ -110,51 +110,7 @@ async function loadDashboard(userId) {
 const books = [];
 
 const bookshelfEl = document.getElementById("bookshelf");
-/*
-function renderBookshelf() {
-  bookshelfEl.innerHTML = "";
 
-  if (books.length === 0) {
-    bookshelfEl.classList.add("empty");
-    return;
-  }
-
-  bookshelfEl.classList.remove("empty");
-
-  books.forEach(book => {
-    const bookEl = document.createElement("div");
-    bookEl.className = "book";
-    bookEl.style.backgroundColor = book.color || "#e8e8e8";
-
-    bookEl.innerHTML = `
-      <div class="spine">${book.title}</div>
-    `;
-
-    bookEl.addEventListener("click", () => {
-      openBook(book);
-    });
-
-    bookshelfEl.appendChild(bookEl);
-  });
-
-  // After rendering, detect rows and assign alternating shelf colors
-  requestAnimationFrame(() => {
-    const bookElements = bookshelfEl.querySelectorAll('.book');
-    let currentRow = 0;
-    let lastTop = null;
-    
-    bookElements.forEach((bookEl) => {
-      const top = bookEl.offsetTop;
-      
-      if (lastTop !== null && top !== lastTop) {
-        currentRow++;
-      }
-      
-      bookEl.dataset.row = currentRow;
-      lastTop = top;
-    });
-  });
-}*/
 function renderBookshelf() {
 
   bookshelfEl.innerHTML = "";
@@ -165,14 +121,26 @@ function renderBookshelf() {
   shelf.className = "shelf";
 
   let currentWidth = 0;
+  const gap = 4;
 
-  books.forEach(book => {
+  books.forEach(item => {
 
-    const bookWidth = getBookWidth(book.pages);
-    const gap = 4;
+    if (!item.type) {
+      item.type = "book"; // default old saved books
+    }
 
-    // if the book doesn't fit on the current shelf
-    if (currentWidth + bookWidth > shelfWidth) {
+    let itemWidth;
+
+    if (item.type === "book") {
+      itemWidth = getBookWidth(item.pages);
+    }
+
+    else if (item.type === "trinket") {
+      itemWidth = item.width || 60;
+    }
+
+    // if item doesn't fit, create new shelf
+    if (currentWidth + itemWidth > shelfWidth) {
       bookshelfEl.appendChild(shelf);
 
       shelf = document.createElement("div");
@@ -181,33 +149,48 @@ function renderBookshelf() {
       currentWidth = 0;
     }
 
-    const bookEl = document.createElement("div");
-    bookEl.className = "book";
+    let itemEl;
 
-    bookEl.style.width = bookWidth + "px";
-    bookEl.style.backgroundColor = book.color || "#e8e8e8";
+    if (item.type === "book") {
 
-    bookEl.innerHTML = `
-      <div class="spine">${book.title}</div>
-    `;
+      itemEl = document.createElement("div");
+      itemEl.className = "book";
 
-    bookEl.addEventListener("click", () => {
-      openBook(book);
-    });
+      itemEl.style.width = itemWidth + "px";
+      itemEl.style.backgroundColor = item.color || "#e8e8e8";
 
-    shelf.appendChild(bookEl);
+      itemEl.innerHTML = `
+        <div class="spine">${item.title}</div>
+      `;
 
-    currentWidth += bookWidth + gap;
+      itemEl.addEventListener("click", () => {
+        openBook(item);
+      });
+
+    }
+
+    else if (item.type === "trinket") {
+
+      itemEl = document.createElement("div");
+      itemEl.className = "trinket";
+
+      itemEl.style.width = item.width + "px";
+      itemEl.style.height = item.height + "px";
+
+      itemEl.innerHTML = `
+        <img src="${item.image}" />
+      `;
+
+    }
+    if (!itemEl) return;
+
+    shelf.appendChild(itemEl);
+    currentWidth += itemWidth + gap;
 
   });
 
   bookshelfEl.appendChild(shelf);
 }
-renderBookshelf();
-
-window.addEventListener("resize", () => {
-  renderBookshelf();
-});
 
 /*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
 // Add book button logic
@@ -215,6 +198,7 @@ window.addEventListener("resize", () => {
 document.getElementById("add-book-button").addEventListener("click", async () => {
   const newBook = {
     id: crypto.randomUUID(),
+    type: "book",
     title: "Untitled Book",
     author: "",
     pages: 0,
@@ -223,21 +207,16 @@ document.getElementById("add-book-button").addEventListener("click", async () =>
     cover: null,
     color: "#e8e8e8"
   };
-
-  books.push(newBook);
-  renderBookshelf();
-  await saveDashboard(auth.currentUser.uid);
 });
 
 /*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
 // Add trtinkets logic 
 /*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
 document.getElementById("add-trinkets").addEventListener("click", async () => {
-  
 
   books.push(newTrinket);
   renderBookshelf();
-  await saveDashboard(auth.currentUser.uid);
+  saveDashboard(auth.currentUser.uid);
 });
 
 
@@ -422,6 +401,70 @@ function getBookWidth(pages) {
 
   return Math.min(width, 160); // optional cap so huge books don't explode
 }
+
+/*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
+// open trinkets popup logic
+/*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
+const trinketsBtn = document.getElementById("add-trinkets");
+const trinketsPopup = document.getElementById("trinkets-popup");  
+trinketsBtn.addEventListener("click", () => {
+  if (trinketsPopup.style.display === "block") {
+    trinketsPopup.style.display = "none";
+  } else {
+    trinketsPopup.style.display = "block";
+    const rect = trinketsBtn.getBoundingClientRect();
+    trinketsPopup.style.top = `${rect.bottom + window.scrollY}px`;
+    trinketsPopup.style.left = `${rect.left + window.scrollX}px`;
+  }
+});
+
+// close trinkets popup when clicking outside
+document.addEventListener("click", (e) => {
+  if (!trinketsPopup.contains(e.target) && e.target !== trinketsBtn) {
+    trinketsPopup.style.display = "none";
+  }
+});
+
+/*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
+// custom trinket button logic
+/*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
+const customTrinket = document.getElementById("custom-trinket");
+
+customTrinket.addEventListener("click", () => {
+  // open computer's file explorer to select an image for the trinket
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "image/*";
+
+  input.addEventListener("change", (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+
+    // when the file is loaded, create a new trinket and add the picture in the bookshelf instead of a book
+    reader.onload = function(event) {
+      const base64Image = event.target.result;
+
+      const newTrinket = {
+        id: crypto.randomUUID(),
+        type: "trinket",
+        image: base64Image,
+        width: 60,
+        height: 60
+      };
+
+      books.push(newTrinket);
+      renderBookshelf();
+      saveDashboard(auth.currentUser.uid);
+    };
+
+    reader.readAsDataURL(file);
+
+  });
+
+  input.click();
+});
 
 /*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
 // Settings modal logic
