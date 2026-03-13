@@ -177,9 +177,21 @@ function renderBookshelf() {
       itemEl.style.width = item.width + "px";
       itemEl.style.height = item.height + "px";
 
-      itemEl.innerHTML = `
-        <img src="${item.image}" />
-      `;
+      itemEl.innerHTML = `<img src="${item.image}" />`;
+
+      // save resize
+      const observer = new ResizeObserver(entries => {
+
+        const rect = entries[0].contentRect;
+
+        item.width = rect.width;
+        item.height = rect.height;
+
+        saveDashboard(auth.currentUser.uid);
+
+      });
+      
+      observer.observe(itemEl);
 
     }
     if (!itemEl) return;
@@ -207,6 +219,10 @@ document.getElementById("add-book-button").addEventListener("click", async () =>
     cover: null,
     color: "#e8e8e8"
   };
+
+  books.push(newBook);
+  renderBookshelf();
+  await saveDashboard(auth.currentUser.uid);
 });
 
 /*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */

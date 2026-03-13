@@ -103,7 +103,7 @@ nav {
   align-items: flex-end;
   gap: 4px;
   padding: 0 10px;
-
+  beight: 180px;
   border-bottom: 12px solid #7a4f2b;
   box-shadow: 0 6px 8px rgba(0,0,0,0.25);
 
@@ -143,13 +143,13 @@ footer {
     border: none;
     color: white;
     font-size: 24px;
-    cursor: pointer;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     border-radius: 10px;
     padding: 5px 10px;
     position: absolute;
     left: 40%;
     top: 22%;
+    cursor: pointer;
 }
 
 #add-book-button {
@@ -566,6 +566,12 @@ h1 {
   display: flex;
   align-items: flex-end;
   justify-content: center;
+  overflow:hidden;
+  resize: both;
+  max-height:180px;
+  max-width: auto;
+  min-height:40px;
+  min-width:40px;
 }
 
 .trinket img {
@@ -574,9 +580,11 @@ h1 {
   object-fit: contain;
 }
 
-.trinket {
-  resize: both;
-  overflow: hidden;
-  min-width: 40px;
-  min-height: 40px;
+.trinket::after{
+  content:"↘";
+  position:absolute;
+  bottom:0;
+  right:2px;
+  font-size:12px;
+  opacity:0.4;
 }
