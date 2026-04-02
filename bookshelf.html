@@ -5,9 +5,6 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Between The Pages</title>
         <link rel="stylesheet" href="b-style.css">
-        <!--google login things-->
-        <script src="https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js"></script>
-        <script src="https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js"></script>
 
         <link href="https://fonts.googleapis.com/css2?family=Indie+Flower&display=swap" rel="stylesheet" />
         <link href="https://fonts.googleapis.com/css2?family=Playpen+Sans&display=swap" rel="stylesheet" /> 
@@ -45,7 +42,7 @@
                 </div>
                 <hr />
                 <br />
-                <label for="color-theme" class="heading">Choose Color Theme:</label>
+                <!--<label for="color-theme" class="heading">Choose Color Theme:</label>
                 <div class="color-theme-container">
                     <button id="default" class="color-theme">Default</button>
                     <button id="blue" class="color-theme">Blue</button>
@@ -57,7 +54,7 @@
                     <button id="gray" class="color-theme">Gray</button>
                     <button id="brown" class="color-theme">Brown</button>
                     <button id="yellow" class="color-theme">Yellow</button>
-                </div>
+                </div>-->
                 <button id="delete-all-books">Delete all books</button>
                 <hr />
                 <button id="close-settings-modal">Close &times;</button>
@@ -94,33 +91,37 @@
             <div class="modal-content" id="book-modal-content">
                 <!--Book cover photo-->
                 <div id="book-cover">
-                    <img id="book-cover-preview" alt="Book Cover Preview" title="Book Cover Preview" />
-                    <input type="file" id="book-cover-input" accept="image/*" />
+                    <div id="book-cover-preview" alt="Book Cover Preview"> </div>
+                    <button id="upload-cover-button"> + </button>
                 </div>
-                <input type="text" id="book-title" placeholder="Book Title" />
-                <input type="text" id="book-author" placeholder="Book Author" />
-                <div id="book-rating"class="rating">
-                    <!-- Stars are ordered in reverse visually but correctly in HTML -->
-                    <input type="radio" id="star5" name="rating" value="5" />
-                    <label for="star5" title="5 stars">&#9733;</label>
-                    <input type="radio" id="star4" name="rating" value="4" />
-                    <label for="star4" title="4 stars">&#9733;</label>
-                    <input type="radio" id="star3" name="rating" value="3" />
-                    <label for="star3" title="3 stars">&#9733;</label>
-                    <input type="radio" id="star2" name="rating" value="2" />
-                    <label for="star2" title="2 stars">&#9733;</label>
-                    <input type="radio" id="star1" name="rating" value="1" />
-                    <label for="star1" title="1 star">&#9733;</label>
+                <div id="book-details">
+                    <input type="text" id="book-title" placeholder="Book Title" />
+                    <input type="text" id="book-author" placeholder="Book Author" />
+                    <button id="genre-button">Select Genre</button> <!--changes height of book-->
+                    <input type="color" id="color" title="Choose book color" /> <!--changes color of book-->
+                    <input type="text" id="book-pages" placeholder="Number of Pages" /> <!--changes width of book-->
+                    <div id="book-rating"class="rating">
+                        <input type="radio" id="star5" name="rating" value="5" />
+                        <label for="star5" title="5 stars">&#9733;</label>
+                        <input type="radio" id="star4" name="rating" value="4" />
+                        <label for="star4" title="4 stars">&#9733;</label>
+                        <input type="radio" id="star3" name="rating" value="3" />
+                        <label for="star3" title="3 stars">&#9733;</label>
+                        <input type="radio" id="star2" name="rating" value="2" />
+                        <label for="star2" title="2 stars">&#9733;</label>
+                        <input type="radio" id="star1" name="rating" value="1" />
+                        <label for="star1" title="1 star">&#9733;</label>
+                    </div>
+                    <div id="output">Rating is: 0/5</div>
                 </div>
-                <div id="output">Rating is: 0/5</div>
-                <button id="genre-button">Select Genre</button> <!--changes height of book-->
-                <input type="text" id="book-pages" placeholder="Number of Pages" /> <!--changes width of book-->
-                <input type="color" id="color" title="Choose book color" /> <!--changes color of book-->
-                <textarea id="book-notes" placeholder="Your notes about the book..."></textarea>
-                <button id="save-book-notes">Save Notes</button>
-                <hr />
-                <button id="close-book-modal">Close &times;</button>
-                <button id="delete-book-button">Delete Book</button>
+                <div id="notes-block">
+                    <button id="save-book-notes">Save Notes</button>
+                    <textarea id="book-notes" placeholder="Your notes about the book..."></textarea>
+                </div>
+                <div id="bottom">
+                    <button id="delete-book-button">Delete Book</button>
+                    <button id="close-book-modal">Close &times;</button>
+                </div>
             </div>
         </div>
 
@@ -152,7 +153,7 @@
         <div id="trinkets-popup" class="trinkets-popup hidden">
             <div class="trinkets-column">
                 <p>Trinkets:</p>
-                <button id="pens">Pens</button>
+                <!--<button id="pens">Pens</button>
                 <button id="reading-lights">Reading Lights</button>
                 <button id="bookends">Bookends</button>
                 <button id="pot-plant">Potted Plants</button>
@@ -160,7 +161,7 @@
                 <button id="candles">Candles</button>
                 <button id="clock">Clock</button>
                 <button id="photo-frames">Photo Frames</button>
-                <button id="book-rests">Book Rests</button>
+                <button id="book-rests">Book Rests</button>-->
                 <button id="custom-trinket">+</button>
             </div>
         </div>

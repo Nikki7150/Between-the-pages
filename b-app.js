@@ -130,13 +130,17 @@ function renderBookshelf() {
     }
 
     let itemWidth;
+    let itemHeight;
+    let itemEl;
 
     if (item.type === "book") {
       itemWidth = getBookWidth(item.pages);
+      itemHeight = getBookHeight(item.genre);
     }
 
     else if (item.type === "trinket") {
       itemWidth = item.width || 60;
+      itemHeight = item.height || 180;
     }
 
     // if item doesn't fit, create new shelf
@@ -149,14 +153,13 @@ function renderBookshelf() {
       currentWidth = 0;
     }
 
-    let itemEl;
-
     if (item.type === "book") {
 
       itemEl = document.createElement("div");
       itemEl.className = "book";
 
       itemEl.style.width = itemWidth + "px";
+      itemEl.style.height = itemHeight + "px";
       itemEl.style.backgroundColor = item.color || "#e8e8e8";
 
       itemEl.innerHTML = `
@@ -211,7 +214,7 @@ document.getElementById("add-book-button").addEventListener("click", async () =>
   const newBook = {
     id: crypto.randomUUID(),
     type: "book",
-    title: "Untitled Book",
+    title: "",
     author: "",
     pages: 0,
     rating: null,
@@ -260,15 +263,23 @@ const bookModal = document.getElementById("book-modal");
 const bookModalContent = document.getElementById("book-modal-content");
 const closeBookModal = document.getElementById("close-book-modal");
 
-closeBookModal.addEventListener("click", () => {
+function hideBookModal() {
+  bookModalContent.classList.remove("remove");
+  bookModal.classList.add("hidden");
+}
+
+function closeBookModalWithAnimation() {
   const handleAnimationEnd = () => {
     bookModalContent.removeEventListener("animationend", handleAnimationEnd);
-    bookModalContent.classList.remove("remove");
-    bookModal.classList.add("hidden");
+    hideBookModal();
   };
 
   bookModalContent.addEventListener("animationend", handleAnimationEnd);
   bookModalContent.classList.add("remove");
+}
+
+closeBookModal.addEventListener("click", () => {
+  closeBookModalWithAnimation();
 });
 
 const deleteBookButton = document.getElementById("delete-book-button");
@@ -286,8 +297,7 @@ deleteBookButton.addEventListener("click", async () => {
       
       const handleAnimationEnd = () => {
         bookModalContent.removeEventListener("animationend", handleAnimationEnd);
-        bookModalContent.classList.remove("remove");
-        bookModal.classList.add("hidden");
+        hideBookModal();
         activeBook = null;
       };
 
@@ -298,6 +308,7 @@ deleteBookButton.addEventListener("click", async () => {
 });
 
 let activeBook = null;
+let saveBookNotesListener = null;
 
 function openBook(book) {
   activeBook = book;
@@ -312,11 +323,27 @@ function openBook(book) {
   document.getElementById("output").innerText = `Rating is: ${book.rating || 0}/5`;
   document.getElementById("color").value = book.color || "#e8e8e8";
   document.getElementById("genre-button").innerText = book.genre || "Select Genre";
-  document.getElementById("book-cover-preview").src = book.cover || "";
-  document.getElementById("book-cover-preview").style.display = book.cover ? "block" : "none";
+  const coverPreviewEl = document.getElementById("book-cover-preview");
+  const uploadCoverButtonEl = document.getElementById("upload-cover-button");
+
+  if (book.cover) {
+    coverPreviewEl.style.backgroundImage = `url(${book.cover})`;
+    coverPreviewEl.style.backgroundSize = "cover";
+    coverPreviewEl.style.backgroundPosition = "center";
+    uploadCoverButtonEl.style.display = "none";
+  } else {
+    coverPreviewEl.style.backgroundImage = "none";
+    uploadCoverButtonEl.style.display = "block";
+  }
   document.getElementById("book-pages").value = book.pages || "";
 
-  document.getElementById("save-book-notes").addEventListener("click", async () => {
+  // Remove old listener before adding new one to prevent stacking
+  const saveBookNotesBtn = document.getElementById("save-book-notes");
+  if (saveBookNotesListener) {
+    saveBookNotesBtn.removeEventListener("click", saveBookNotesListener);
+  }
+
+  saveBookNotesListener = async () => {
     if (!activeBook) return;
 
     activeBook.title = document.getElementById("book-title").value;
@@ -330,11 +357,14 @@ function openBook(book) {
 
     renderBookshelf();
     await saveDashboard(auth.currentUser.uid);
-    genres.style.display = "none";
+    genres.classList.add("hidden");
 
-    bookModal.classList.add("hidden");
-  });
+    hideBookModal();
+  };
 
+  saveBookNotesBtn.addEventListener("click", saveBookNotesListener);
+
+  bookModalContent.classList.remove("remove");
   bookModal.classList.remove("hidden");
 }
 
@@ -356,66 +386,175 @@ colorInput.addEventListener("input", async (e) => {
 /*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
 // saving book cover logic
 /*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
-const coverInput = document.getElementById("book-cover-input");
+const uploadButton = document.getElementById("upload-cover-button");
 const coverPreview = document.getElementById("book-cover-preview");
 
-coverInput.addEventListener("change", (e) => {
-  if (!activeBook) return;
+uploadButton.addEventListener("click", () => {
+  const input = document.createElement("input");
+  input.type = "file";
+  input.accept = "image/*";
 
-  const file = e.target.files[0];
-  if (!file) return;
+  input.addEventListener("change", async (e) => {
+    const file = e.target.files[0];
+    if (!file || !activeBook) return;
 
-  const reader = new FileReader();
+    try {
+      const uid = auth.currentUser?.uid;
+      if (!uid) return;
 
-  reader.onload = function(event) {
-    const base64Image = event.target.result;
+      const extension = file.name.split(".").pop() || "jpg";
+      const storagePath = `users/${uid}/book-covers/${activeBook.id}.${extension}`;
+      const fileRef = ref(storage, storagePath);
 
-    activeBook.cover = base64Image;
+      await uploadBytes(fileRef, file);
+      const downloadUrl = await getDownloadURL(fileRef);
 
-    coverPreview.src = base64Image;
-    coverPreview.style.display = "block";
-  };
+      activeBook.cover = downloadUrl;
+      coverPreview.style.backgroundImage = `url(${downloadUrl})`;
+      coverPreview.style.backgroundSize = "cover";
+      coverPreview.style.backgroundPosition = "center";
+      uploadButton.style.display = "none";
 
-  reader.readAsDataURL(file);
-});
+      renderBookshelf();
+      await saveDashboard(uid);
+    } catch (err) {
+      console.error("Error uploading cover:", err);
+      alert("Couldn't upload cover. Please try again.");
+    }
+  });
 
-coverPreview.addEventListener("click", () => {
-  coverInput.click();
+  input.click();
 });
 
 /*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
-// Genre selection logic (for demo purposes, just toggles between genres)
+// Genre selection logic 
 /*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
 const genreButton = document.getElementById("genre-button");
 const genres = document.getElementById("genre-popup");
+const customGenreInput = document.getElementById("custom-genre-input");
 
-genreButton.addEventListener("click", () => {
-  if (!activeBook) return;
+function toggleGenrePopup() {
+  if (!activeBook) {
+    console.warn("No active book when trying to open genre popup");
+    return;
+  }
 
-  if (genres.style.display === "block") {
-    genres.style.display = "none";
-  } else {
-    genres.style.display = "block";
+  const isHidden = genres.classList.contains("hidden");
+  
+  if (isHidden) {
+    genres.classList.remove("hidden");
+    genres.style.visibility = "visible";
+    genres.style.pointerEvents = "auto";
+    // Position popup relative to the genre button
     const rect = genreButton.getBoundingClientRect();
-    genres.style.top = `${rect.top + window.scrollY}px`;
-    genres.style.left = `${rect.right + 8 + window.scrollX}px`;
+    genres.style.top = `${rect.bottom + window.scrollY + 8}px`;
+    genres.style.left = `${rect.left + window.scrollX}px`;
+  } else {
+    genres.classList.add("hidden");
+    genres.style.visibility = "hidden";
+    genres.style.pointerEvents = "none";
+  }
+}
+
+genreButton.addEventListener("click", (e) => {
+  e.stopPropagation();
+  toggleGenrePopup();
+});
+
+// Close genre popup when clicking outside
+document.addEventListener("click", (e) => {
+  if (!genres.classList.contains("hidden") && 
+      !genres.contains(e.target) && 
+      e.target !== genreButton) {
+    genres.classList.add("hidden");
   }
 });
 
 // --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 // Add event listeners to genre options
 /*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
-const genreOptions = genres.querySelectorAll("div");
+genres.addEventListener("click", async (event) => {
+  const target = event.target;
+
+  if (!activeBook) return;
+
+  if (target.tagName === "BUTTON" && target.id !== "genre-button") {
+    const genre = target.textContent.trim();
+    activeBook.genre = genre;
+    genreButton.textContent = genre;
+
+    renderBookshelf();
+    await saveDashboard(auth.currentUser.uid);
+    genres.classList.add("hidden");
+  }
+});
+
+customGenreInput.addEventListener("keydown", async (event) => {
+  if (event.key !== "Enter") return;
+  if (!activeBook) return;
+
+  const genre = customGenreInput.value.trim();
+  if (!genre) return;
+
+  activeBook.genre = genre;
+  genreButton.textContent = genre;
+  customGenreInput.value = "";
+
+  renderBookshelf();
+  await saveDashboard(auth.currentUser.uid);
+  genres.classList.add("hidden");
+});
 
 //--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-// change width of books based on width
+// change height of books based on pages
+/*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
+function getBookHeight(genre) {
+  if (!genre) return 180; // default height
+  const genreHeights = {
+    "Fantasy": 210,
+    "Science Fiction": 205,
+    "Mystery": 200,
+    "Romance": 195,
+    "Horror": 190,
+    "Non-Fiction": 185,
+    "Historical": 180,
+    "Thriller": 175,
+    "Young Adult": 170,
+    "Children's": 165,
+    "Memoir": 160,
+    "Self Help": 155,
+    "Literary Fiction": 150,
+    "True Crime": 145
+  };
+
+  return genreHeights[genre] || 180; // default height if genre not found
+}
+
+//--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+// change width of books based on pages
 /*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
 function getBookWidth(pages) {
   if (!pages) return 16; // default width
 
   const width = Math.ceil(pages / 100) * 16;
 
-  return Math.min(width, 160); // optional cap so huge books don't explode
+  return Math.min(width, 160); // cap max width at 160px
+}
+
+/*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
+// change font size of spine text based on book height and width
+/*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
+
+function getSpineFontSize(width, height) {
+  // base size from both dimensions
+  const sizeFromWidth = width * 0.28;
+  const sizeFromHeight = height * 0.08;
+
+  // use the smaller one so text still fits
+  const fontSize = Math.min(sizeFromWidth, sizeFromHeight);
+
+  // keep it readable, but not ridiculous
+  return Math.max(10, Math.min(fontSize, 22));
 }
 
 /*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
@@ -519,188 +658,6 @@ deleteAllBooksBtn.addEventListener("click", async () => {
   }
 });
 
-/*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
-// Color theme button listeners
-/*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
-document.getElementById("default").addEventListener("click", async () => {
-  document.documentElement.style.setProperty(
-    "--panel-bg",
-    "#d4d4d4" // pick any color
-  );
-  document.documentElement.style.setProperty(
-    "--button-color",
-    "#7aa6dd"
-  );
-  if (newBtn) newBtn.style.backgroundColor = "#f0f0f0";
-  // also change html background to match the new theme
-  document.documentElement.style.setProperty(
-    "--bg-color",
-    "#ffffff"
-  );
-  await saveDashboard(auth.currentUser.uid);
-});
-
-document.getElementById("blue").addEventListener("click", async () => {
-  document.documentElement.style.setProperty(
-    "--panel-bg",
-    "#638dd5" // pick any color
-  );
-  document.documentElement.style.setProperty(
-    "--button-color",
-    "#549ddd"
-  );
-  if (newBtn) newBtn.style.backgroundColor = "#638dd5";
-  // also change html background to match the new theme
-  document.documentElement.style.setProperty(
-    "--bg-color",
-    "#7da0ddb4"
-  );
-  await saveDashboard(auth.currentUser.uid);
-});
-
-document.getElementById("green").addEventListener("click", async () => {
-  document.documentElement.style.setProperty(
-    "--panel-bg",
-    "#416e57" // pick any color
-  );
-  document.documentElement.style.setProperty(
-    "--button-color",
-    "#6cb485"
-  );
-  if (newBtn) newBtn.style.backgroundColor = "#416e57";
-  // also change html background to match the new theme
-  document.documentElement.style.setProperty(
-    "--bg-color",
-    "#508268b4"
-  );
-  await saveDashboard(auth.currentUser.uid);
-});
-
-document.getElementById("red").addEventListener("click", async () => {
-  document.documentElement.style.setProperty(
-    "--panel-bg",
-    "#970404" // pick any color
-  );
-  document.documentElement.style.setProperty(
-    "--button-color",
-    "#e73838"
-  );
-  if (newBtn) newBtn.style.backgroundColor = "#970404";
-  // also change html background to match the new theme
-  document.documentElement.style.setProperty(
-    "--bg-color",
-    "#970404b4"
-  );
-  await saveDashboard(auth.currentUser.uid);
-});
-
-document.getElementById("purple").addEventListener("click", async () => {
-  document.documentElement.style.setProperty(
-    "--panel-bg",
-    "#7546a2" // pick any color
-  );
-  document.documentElement.style.setProperty(
-    "--button-color",
-    "#8353c8"
-  );
-  if (newBtn) newBtn.style.backgroundColor = "#7546a2";
-  // also change html background to match the new theme
-  document.documentElement.style.setProperty(
-    "--bg-color",
-    "#7546a2b4"
-  );
-  await saveDashboard(auth.currentUser.uid);
-});
-
-document.getElementById("orange").addEventListener("click", async () => {
-  document.documentElement.style.setProperty(
-    "--panel-bg",
-    "#ea8118" // pick any color
-  );
-  document.documentElement.style.setProperty(
-    "--button-color",
-    "#f8a74b"
-  );
-  if (newBtn) newBtn.style.backgroundColor = "#ea8118";
-  // also change html background to match the new theme
-  document.documentElement.style.setProperty(
-    "--bg-color",
-    "#fbae62e8"
-  );
-  await saveDashboard(auth.currentUser.uid);
-});
-
-document.getElementById("pink").addEventListener("click", async () => {
-  document.documentElement.style.setProperty(
-    "--panel-bg",
-    "#f155a0" // pick any color
-  );
-  document.documentElement.style.setProperty(
-    "--button-color",
-    "#f289c6"
-  );
-  if (newBtn) newBtn.style.backgroundColor = "#f155a0";
-  // also change html background to match the new theme
-  document.documentElement.style.setProperty(
-    "--bg-color",
-    "#f6a8ce"
-  );
-  await saveDashboard(auth.currentUser.uid);
-});
-
-document.getElementById("gray").addEventListener("click", async () => {
-  document.documentElement.style.setProperty(
-    "--panel-bg",
-    "#6d6d6d" // pick any color
-  );
-  document.documentElement.style.setProperty(
-    "--button-color",
-    "#838383"
-  );
-  if (newBtn) newBtn.style.backgroundColor = "#6d6d6d";
-  // also change html background to match the new theme
-  document.documentElement.style.setProperty(
-    "--bg-color",
-    "#c2c2c2"
-  );
-  await saveDashboard(auth.currentUser.uid);
-});
-
-document.getElementById("brown").addEventListener("click", async () => {
-  document.documentElement.style.setProperty(
-    "--panel-bg",
-    "#935c50" // pick any color
-  );
-  document.documentElement.style.setProperty(
-    "--button-color",
-    "#7a5a5a"
-  );
-  if (newBtn) newBtn.style.backgroundColor = "#935c50";
-  // also change html background to match the new theme
-  document.documentElement.style.setProperty(
-    "--bg-color",
-    "#935c50b4"
-  );
-  await saveDashboard(auth.currentUser.uid);
-});
-
-document.getElementById("yellow").addEventListener("click", async () => {
-  document.documentElement.style.setProperty(
-    "--panel-bg",
-    "#ebcb48" // pick any color
-  );
-  document.documentElement.style.setProperty(
-    "--button-color",
-    "#fcd677"
-  );
-  if (newBtn) newBtn.style.backgroundColor = "#ebcb48";
-  // also change html background to match the new theme
-  document.documentElement.style.setProperty(
-    "--bg-color",
-    "#ede0a9"
-  );
-  await saveDashboard(auth.currentUser.uid);
-});
 
 /*-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
 // font style button listeners
@@ -737,16 +694,50 @@ const profileModal = document.getElementById("profile-modal");
 const closeProfileModal = document.getElementById("close-profile-modal");
 const closeProfileModalAlt = document.getElementById("close-p-modal");
 
-profileBtn.addEventListener("click", () => {
+function openProfileModal() {
+  if (!profileModal) return;
   profileModal.classList.remove("hidden");
+}
+
+if (profileBtn) {
+  profileBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    openProfileModal();
+  });
+} else {
+  alert("Profile button not found! Profile modal won't work.");
+}
+
+document.addEventListener("click", (e) => {
+  if (e.target.closest && e.target.closest("#profile-pic")) {
+    openProfileModal();
+  }
 });
 
-closeProfileModal.addEventListener("click", () => {
-  profileModal.classList.add("hidden");
-});
+if (closeProfileModal) {
+  closeProfileModal.addEventListener("click", () => {
+    if (profileModal) {
+      profileModal.classList.add("hidden");
+    }
+  });
+}
 
-closeProfileModalAlt.addEventListener("click", () => {
-  profileModal.classList.add("hidden");
+if (closeProfileModalAlt) {
+  closeProfileModalAlt.addEventListener("click", () => {
+    if (profileModal) {
+      profileModal.classList.add("hidden");
+    }
+  });
+}
+
+// Close profile modal when clicking outside
+document.addEventListener("click", (e) => {
+  if (profileModal && 
+      !profileModal.classList.contains("hidden") && 
+      !profileModal.contains(e.target) && 
+      e.target !== profileBtn) {
+    profileModal.classList.add("hidden");
+  }
 });
 
 onAuthStateChanged(auth, (user) => {

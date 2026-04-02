@@ -32,70 +32,16 @@ nav {
     font-size: 20px;
     padding: 20px;
 }
-/*
-#bookshelf {
-  display: flex;
-  flex-wrap: wrap;        /* creates new shelves automatically 
-  align-items: flex-end;  /* books sit on the shelf bottom 
-  column-gap: 4px;  /* space between books on same shelf 
-  row-gap: 40px;    /* space between shelves (rows) 
-  padding: 40px;
-}
-
-/* Optional empty state 
-#bookshelf.empty::after {
-  content: "Your shelf is waiting for its first story 📚";
-  color: #e8e8e8;
-  font-style: italic;
-  grid-column: 1 / -1;
-  text-align: center;
-}
-
-#bookshelf {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: flex-end;
-  column-gap: 4px;  /* space between books on same shelf 
-  row-gap: 40px;    /* space between shelves (rows) 
-  padding: 40px;
-
-  /* bookshelf look 
-  background: repeating-linear-gradient(
-  to bottom,
-  transparent 0px,
-  transparent 220px,
-  #7a4f2b 220px,
-  #9b6a3a 225px,
-  #6b3f1e 230px
-);
-  border-left: 20px solid #6b3f1e;
-  border-right: 20px solid #6b3f1e;
-}
-
-.book {
-  width: 40px;
-  height: 180px;
-  background: #e8e8e8;
-  border-radius: 3px;
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-  cursor: pointer;
-  margin-bottom: 5px;
-}
-
-.book .spine {
-  writing-mode: vertical-rl;
-  transform: rotate(180deg);
-  padding: 6px;
-  font-size: 12px;
-}*/
 
 #bookshelf {
   padding: 40px;
+  padding-left: 0;
+  padding-right: 0;
   display: flex;
   flex-direction: column;
   gap: 60px;
+  border-left: 50px solid brown;
+  border-right: 50px solid brown;
 }
 
 .shelf {
@@ -103,16 +49,15 @@ nav {
   align-items: flex-end;
   gap: 4px;
   padding: 0 10px;
-  beight: 180px;
+  height: 180px;
   border-bottom: 12px solid #7a4f2b;
   box-shadow: 0 6px 8px rgba(0,0,0,0.25);
-
   
 }
 
 .book {
   min-width: 18px;
-  min-height: 180px;
+  min-height: 145px;
   background: #e5e5e5;
   border-radius: 3px;
   display: flex;
@@ -124,7 +69,12 @@ nav {
 .spine {
   writing-mode: vertical-rl;
   transform: rotate(180deg);
-  font-size: 10px;
+  text-align: center;
+  line-height: 1;
+  padding: 4px 2px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 footer {
@@ -174,6 +124,10 @@ footer {
     position: absolute;
     right: 2%;
     top: 19%;
+    object-fit: cover;
+    background-color: #ccc;
+    display: block;
+    z-index: 2000;
 }
 
 #settings-button {
@@ -395,6 +349,8 @@ h1 {
     color: rgb(255, 235, 122);
 }
 
+
+
 /* Optional: additional styling for the output div */
 #output {
     margin-top: 10px;
@@ -403,11 +359,12 @@ h1 {
 
 #book-modal-content {
     position: absolute;
-    background: rgb(208, 187, 161);
-    border: 1px solid #ccc;
-    padding: 10px;
-    border-radius: 0px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    background: transparent;
+    background-image: url("paper.png");
+    background-repeat: no-repeat;
+    background-size: 100% 160%;
+    padding: 20px;
+    box-shadow: none;
     z-index: 100;
     width: 60%;
     height: 90%;
@@ -445,12 +402,40 @@ h1 {
     }
 }
 
-#book-cover-input {
-  display: none;
+#book-cover {
+  border: dotted black 2px;
+  width: 200px;
+  height: 305px;
+  position: absolute;
+  top: 60px;
+  left: 70px;
+  align-items: center;
+  justify-content: center;
 }
 
 #book-cover-preview {
+  width: 195px;
+  height: 300px;
+  background-color: white;
+  border: solid white 2px;
+  position: absolute;
+  object-fit: cover;
+}
+
+#upload-cover-button {
+  position: absolute;
+  top: 120px;
+  left: 90px;
+  background-color: rgb(181, 181, 181);
+  border: solid black 1px;
+  width: 30px;
+  height: 30px;
+  font-size: 20px;
+  color: #333;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 
@@ -516,6 +501,78 @@ h1 {
     transform: scale(1);
     opacity: 1;
   }
+}
+
+#book-details {
+  position: absolute;
+  top: 70px;
+  left: 300px;
+  width: 250px;
+  input[type="text"] {
+    width: 650px;
+    margin: 10px;
+    font-size: 18px;
+  }
+  button {
+    margin: 10px;
+    font-size: 18px;
+    cursor: pointer;
+    position: relative;
+    left: -45px;
+  }
+  #book-rating {
+    position: relative;
+  }
+  #output {
+    position: relative;
+    left: -70px;
+  }
+}
+
+#notes-block {
+  position: absolute;
+  top: 330px;
+  left: 70px;
+  width: 250px;
+  textarea {
+    width: 900px;
+    height: 400px;
+    margin-top: 30px;
+    font-size: 20px;
+  }
+  button {
+    position: relative;
+    left: 740px;
+    cursor: pointer;
+  }
+}
+
+#bottom {
+  position: absolute;
+  bottom: 20px;
+  left: 300px;
+  width: 250px;
+
+  #delete-book-button {
+    font-size: 15px;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+    padding: 5px 10px;
+    position: relative;
+    left: 500px;
+  }
+
+  #close-book-modal {
+  margin-top: 10px;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  font-size: 19px;
+  bottom: 5%;
+  left: 50%;
+  position: absolute;
+}
 }
 
 /*--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- */
@@ -588,3 +645,4 @@ h1 {
   font-size:12px;
   opacity:0.4;
 }
+
