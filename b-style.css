@@ -40,8 +40,8 @@ nav {
   display: flex;
   flex-direction: column;
   gap: 60px;
-  border-left: 50px solid brown;
-  border-right: 50px solid brown;
+  border-left: 50px solid rgb(37, 24, 24);
+  border-right: 50px solid rgb(37, 24, 24);
 }
 
 .shelf {
